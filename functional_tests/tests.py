@@ -1,10 +1,11 @@
 from selenium import webdriver
 from selenium.webdriver.common import keys
+from django.test import LiveServerTestCase
 import time
 import unittest
 
 
-class NewVisitorTest(unittest.TestCase):
+class NewVisitorTest(LiveServerTestCase):
     def setUp(self):
         """setUp方法在各个测试方法之前运行"""
         # 打开浏览器
@@ -23,7 +24,8 @@ class NewVisitorTest(unittest.TestCase):
     def test_can_start_a_list_and_retrieve_it_later(self):
         # Alice听说有一个很酷的在线待办事项应用
         # 她去看了这个应用的首页
-        self.browser.get("http://localhost:8000")
+        # self.browser.get("http://localhost:8000")
+        self.browser.get(self.live_server_url)
 
         # 她在网页的标题和头部看到了“To-Do”这个词
         self.assertIn('To-Do', self.browser.title)
@@ -67,7 +69,7 @@ class NewVisitorTest(unittest.TestCase):
         # table = self.browser.find_element_by_id('id_list_table')
         # rows = table.find_elements_by_tag_name('tr')
         # self.assertIn('2: Use peacock feathers to make a fly', [row.text for row in rows])
-        self.check_for_row_in_list_table('Use peacock feathers to make a fly')
+        self.check_for_row_in_list_table('2: Use peacock feathers to make a fly')
         # 爱丽丝想知道这个网站是否会记住她的待办事项清单
         # 她看到网站为她生成了一个唯一的URL
         # 而且页面中有一些文字解说功能
@@ -75,8 +77,8 @@ class NewVisitorTest(unittest.TestCase):
         self.fail('Finish the test!!')
 
 
-if __name__ == '__main__':
-    unittest.main(warnings='ignore')
+# if __name__ == '__main__':
+#     unittest.main(warnings='ignore')
 
 # assert 'To-Do' in browser.title, "Browser title was " + browser.title
 # Alice使用应用的故事
