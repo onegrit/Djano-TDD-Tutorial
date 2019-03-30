@@ -1,8 +1,11 @@
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common import keys
 from django.test import LiveServerTestCase
 import time
 import unittest
+
+MAX_WAIT = 10
 
 
 class NewVisitorTest(LiveServerTestCase):
@@ -16,10 +19,19 @@ class NewVisitorTest(LiveServerTestCase):
         # 关闭浏览器
         self.browser.quit()
 
-    def check_for_row_in_list_table(self, row_text):
-        table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_elements_by_tag_name('tr')
-        self.assertIn(row_text, [row.text for row in rows])
+    def wait_for_row_in_list_table(self, row_text):
+        """不使用time.sleep()显示等待时间，而使用重试循环"""
+        start_time = time.time()
+        while True:
+            try:
+                table = self.browser.find_element_by_id('id_list_table')
+                rows = table.find_elements_by_tag_name('tr')
+                self.assertIn(row_text, [row.text for row in rows])
+                return
+            except (AssertionError, WebDriverException) as e:
+                if time.time() - start_time > MAX_WAIT:
+                    raise e
+                time.sleep(0.5)
 
     def test_can_start_a_list_and_retrieve_it_later(self):
         # Alice听说有一个很酷的在线待办事项应用
@@ -46,7 +58,7 @@ class NewVisitorTest(LiveServerTestCase):
         # 她按回车键后，页面更新了
         # 待办事项表格中显示了"1: Buy peacock feathers"
         inputbox.send_keys(keys.Keys.ENTER)
-        time.sleep(2)
+        # time.sleep(2)
         # 使用函数，重构下面的代码
         # table = self.browser.find_element_by_id('id_list_table')
         # rows = table.find_elements_by_tag_name('tr')
@@ -56,7 +68,7 @@ class NewVisitorTest(LiveServerTestCase):
         # )
         # 将assertTrue改为assertIn
         # self.assertIn('1: Buy peacock feathers', [row.text for row in rows])
-        self.check_for_row_in_list_table('1: Buy peacock feathers')
+        self.wait_for_row_in_list_table('1: Buy peacock feathers')
         # 页面中又显示了一个文本框，可以输入其他的待办事项
 
         # 她输入了"Use peacock feathers to make a fly"
@@ -64,18 +76,57 @@ class NewVisitorTest(LiveServerTestCase):
         inputbox = self.browser.find_element_by_id('id_new_item')
         inputbox.send_keys('Use peacock feathers to make a fly')
         inputbox.send_keys(keys.Keys.ENTER)
-        time.sleep(1)
+        # time.sleep(1)
         # 页面再次更新，清单中显示了两个待办事项
         # table = self.browser.find_element_by_id('id_list_table')
         # rows = table.find_elements_by_tag_name('tr')
         # self.assertIn('2: Use peacock feathers to make a fly', [row.text for row in rows])
-        self.check_for_row_in_list_table('2: Use peacock feathers to make a fly')
+        self.wait_for_row_in_list_table('2: Use peacock feathers to make a fly')
         # 爱丽丝想知道这个网站是否会记住她的待办事项清单
-        # 她看到网站为她生成了一个唯一的URL
+        # 想让每个都用户都能保存自己的待办事项清单（待办事项列表）
+        # 待办事项清单有多个待办事项组成
+        # 她看到网站为她生成了一个唯一的URL（每个用户独享一个URL）
         # 而且页面中有一些文字解说功能
 
-        self.fail('Finish the test!!')
+    def test_multiple_users_can_start_lists_at_different_urls(self):
+        # Alice新建一个代办事项清单（列表）
+        self.browser.get(self.live_server_url)
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('Buy peacock feathers')
+        inputbox.send_keys(keys.Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Buy peacock feathers')
+        # 她注意到清单有唯一的URL
+        edith_list_url = self.browser.current_url
+        self.assertRegex(edith_list_url, '/lists/.+')
 
+        # 现在一个叫做弗朗西斯的新用户访问了网站
+        ## 我们使用一个新浏览器会话
+        ## 确保Alice的信息不会从cookie中泄露出去
+        self.browser.quit()
+        self.browser = webdriver.Firefox()
+        # 弗朗西斯访问首页
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element_by_name('body').text
+        self.assertNotIn('Buy peacock feathers', page_text)
+        self.assertNotIn('make a fly', page_text)
+
+        # 弗朗西斯输入一个新待办事项，新建一个清单
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('Buy milk')
+        inputbox.send_keys(keys.Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Buy milk')
+
+        # 弗朗西斯获得了她的唯一URL
+        francis_list_url = self.browser.current_url
+        self.assertRegex(francis_list_url, '/lists/.+')
+        self.assertNotEqual(francis_list_url, edith_list_url)
+
+        # 这个页面还是没有Alice的清单
+        page_text = self.browser.find_elements_by_tag_name('body').text
+        self.assertNotIn('Buy peacock feathers',page_text)
+        self.assertIn('Buy milk',page_text)
+
+        self.fail('Finish the test!!')
 
 # if __name__ == '__main__':
 #     unittest.main(warnings='ignore')
