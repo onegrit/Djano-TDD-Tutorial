@@ -15,6 +15,11 @@ class NewVisitorTest(unittest.TestCase):
         # 关闭浏览器
         self.browser.quit()
 
+    def check_for_row_in_list_table(self, row_text):
+        table = self.browser.find_element_by_id('id_list_table')
+        rows = table.find_elements_by_tag_name('tr')
+        self.assertIn(row_text, [row.text for row in rows])
+
     def test_can_start_a_list_and_retrieve_it_later(self):
         # Alice听说有一个很酷的在线待办事项应用
         # 她去看了这个应用的首页
@@ -40,14 +45,16 @@ class NewVisitorTest(unittest.TestCase):
         # 待办事项表格中显示了"1: Buy peacock feathers"
         inputbox.send_keys(keys.Keys.ENTER)
         time.sleep(2)
-        table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_elements_by_tag_name('tr')
+        # 使用函数，重构下面的代码
+        # table = self.browser.find_element_by_id('id_list_table')
+        # rows = table.find_elements_by_tag_name('tr')
         # self.assertTrue(
         #     any(row.text == '1: Buy peacock feathers' for row in rows),
         #     f"New to-do item did not appear in table. Contents were:\n {table.text}"
         # )
         # 将assertTrue改为assertIn
-        self.assertIn('1: Buy peacock feathers', [row.text for row in rows])
+        # self.assertIn('1: Buy peacock feathers', [row.text for row in rows])
+        self.check_for_row_in_list_table('1: Buy peacock feathers')
         # 页面中又显示了一个文本框，可以输入其他的待办事项
 
         # 她输入了"Use peacock feathers to make a fly"
@@ -57,10 +64,10 @@ class NewVisitorTest(unittest.TestCase):
         inputbox.send_keys(keys.Keys.ENTER)
         time.sleep(1)
         # 页面再次更新，清单中显示了两个待办事项
-        table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_elements_by_tag_name('tr')
-        self.assertIn('2: Use peacock feathers to make a fly', [row.text for row in rows])
-
+        # table = self.browser.find_element_by_id('id_list_table')
+        # rows = table.find_elements_by_tag_name('tr')
+        # self.assertIn('2: Use peacock feathers to make a fly', [row.text for row in rows])
+        self.check_for_row_in_list_table('Use peacock feathers to make a fly')
         # 爱丽丝想知道这个网站是否会记住她的待办事项清单
         # 她看到网站为她生成了一个唯一的URL
         # 而且页面中有一些文字解说功能
