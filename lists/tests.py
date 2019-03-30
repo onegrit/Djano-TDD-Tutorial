@@ -8,6 +8,7 @@ from lists.models import Item
 """
 测试原则：
 1. 不要测试常量，如测试HTML页面tag
+2. 一个测试只测试一件事情
 """
 
 
@@ -45,10 +46,37 @@ class HomePageTest(TestCase):
         self.assertTemplateUsed(response, 'home.html')
 
     def test_can_save_a_POST_request(self):
-        """测试表单"""
+        """测试保存"""
+        # To-Do: 代码异味：POST氢气的测试太长了
         response = self.client.post('/', data={'item_text': 'A new list item'})
-        self.assertIn('A new list item', response.content.decode())
-        self.assertTemplateUsed(response, 'home.html')
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, 'A new list item')
+
+        # POST请求后应该重定向到首页
+        # 将下面的测试职责移到新的单元测试中 test_redirects_after_post
+        # self.assertEqual(response.status_code, 302)
+        # self.assertEqual(response['location'], '/')
+        # self.assertIn('A new list item', response.content.decode())
+        # self.assertTemplateUsed(response, 'home.html')
+
+    def test_redirects_after_post(self):
+        response = self.client.post('/', data={'item_text': 'A new list item'})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['location'], '/')
+
+    def test_only_save_items_when_necessary(self):
+        self.client.get('/')
+        self.assertEqual(Item.objects.count(), 0)
+
+    def test_display_all_list_items(self):
+        Item.objects.create(text='itemey 1')
+        Item.objects.create(text='itemey 2')
+
+        response = self.client.get('/')
+
+        self.assertIn('itemey 1', response.content.decode())
+        self.assertIn('itemey 2', response.content.decode())
 
 
 class ItemModelTest(TestCase):
