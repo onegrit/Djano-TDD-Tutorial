@@ -3,16 +3,17 @@ from django.urls import resolve
 from lists.views import home_page
 from django.http import HttpRequest
 
-
 """
 测试原则：
 1. 不要测试常量，如测试HTML页面tag
 """
+
+
 class HomePageTest(TestCase):
     # def test_root_url_resolves_to_home_page_view(self):
-        # resolve用于解析url，并将其映射到相应的视图函数。检查解析网站根路径”/"时，是否能找到名为home_page的函数
-        # found = resolve('/')
-        # self.assertEqual(found.func, home_page)
+    # resolve用于解析url，并将其映射到相应的视图函数。检查解析网站根路径”/"时，是否能找到名为home_page的函数
+    # found = resolve('/')
+    # self.assertEqual(found.func, home_page)
 
     def test_home_page_returns_correct_html(self):
         # 测试方法1： 原生测试方法
@@ -35,5 +36,15 @@ class HomePageTest(TestCase):
         self.assertIn('<title>To-Do lists</title>', html)
         self.assertTrue(html.endswith('</html>'))
 
+        # self.assertTemplateUsed(response, 'home.html')
+
+    def test_uses_home_template(self):
+        response = self.client.get('/')
+        self.assertTemplateUsed(response, 'home.html')
+
+    def test_can_save_a_POST_request(self):
+        """测试表单"""
+        response = self.client.post('/', data={'item_text': 'A new list item'})
+        self.assertIn('A new list item', response.content.decode())
         self.assertTemplateUsed(response, 'home.html')
 

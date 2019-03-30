@@ -39,17 +39,32 @@ class NewVisitorTest(unittest.TestCase):
         # 她按回车键后，页面更新了
         # 待办事项表格中显示了"1: Buy peacock feathers"
         inputbox.send_keys(keys.Keys.ENTER)
-        time.sleep(1)
+        time.sleep(2)
         table = self.browser.find_element_by_id('id_list_table')
         rows = table.find_elements_by_tag_name('tr')
-        self.assertTrue(
-            any(row.text == '1: Buy peacock feathers' for row in rows),
-            "New to-do item did not appear in table"
-        )
-
+        # self.assertTrue(
+        #     any(row.text == '1: Buy peacock feathers' for row in rows),
+        #     f"New to-do item did not appear in table. Contents were:\n {table.text}"
+        # )
+        # 将assertTrue改为assertIn
+        self.assertIn('1: Buy peacock feathers', [row.text for row in rows])
         # 页面中又显示了一个文本框，可以输入其他的待办事项
+
         # 她输入了"Use peacock feathers to make a fly"
-        # 爱丽丝做事很有条理
+        # 爱丽丝做事很有条理，再输入一个待办事项
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('Use peacock feathers to make a fly')
+        inputbox.send_keys(keys.Keys.ENTER)
+        time.sleep(1)
+        # 页面再次更新，清单中显示了两个待办事项
+        table = self.browser.find_element_by_id('id_list_table')
+        rows = table.find_elements_by_tag_name('tr')
+        self.assertIn('2: Use peacock feathers to make a fly', [row.text for row in rows])
+
+        # 爱丽丝想知道这个网站是否会记住她的待办事项清单
+        # 她看到网站为她生成了一个唯一的URL
+        # 而且页面中有一些文字解说功能
+
         self.fail('Finish the test!!')
 
 
@@ -62,9 +77,6 @@ if __name__ == '__main__':
 
 # 页面再次更新，他的待办事项清单中显示了这两个待办事项
 
-# 爱丽丝想知道这个网站是否会记住她的待办事项清单
-# 她看到网站为她生成了一个唯一的URL
-# 而且页面中有一些文字解说功能
 
 # 她访问那个URL，发现她的待办事项列表还在
 
