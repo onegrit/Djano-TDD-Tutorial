@@ -20,7 +20,7 @@ class NewVisitorTest(unittest.TestCase):
 
         # 她在网页的标题和头部看到了“To-Do”这个词
         self.assertIn('To-Do', self.browser.title)
-        self.fail('Finish the test!')
+        # self.fail('Finish the test!')
 
 
 if __name__ == '__main__':
