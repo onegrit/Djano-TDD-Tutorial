@@ -89,6 +89,7 @@ class NewVisitorTest(LiveServerTestCase):
         # 而且页面中有一些文字解说功能
 
     def test_multiple_users_can_start_lists_at_different_urls(self):
+        """测试多个用户可以开启不同的待办任务清单列表"""
         # Alice新建一个代办事项清单（列表）
         self.browser.get(self.live_server_url)
         inputbox = self.browser.find_element_by_id('id_new_item')
@@ -122,11 +123,11 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertNotEqual(francis_list_url, edith_list_url)
 
         # 这个页面还是没有Alice的清单
-        page_text = self.browser.find_elements_by_tag_name('body').text
+        page_text = self.browser.find_element_by_tag_name('body').text
         self.assertNotIn('Buy peacock feathers',page_text)
         self.assertIn('Buy milk',page_text)
 
-        self.fail('Finish the test!!')
+        # self.fail('Finish the test!!')
 
 # if __name__ == '__main__':
 #     unittest.main(warnings='ignore')
