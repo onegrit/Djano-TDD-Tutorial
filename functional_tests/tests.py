@@ -124,21 +124,42 @@ class NewVisitorTest(LiveServerTestCase):
 
         # 这个页面还是没有Alice的清单
         page_text = self.browser.find_element_by_tag_name('body').text
-        self.assertNotIn('Buy peacock feathers',page_text)
-        self.assertIn('Buy milk',page_text)
+        self.assertNotIn('Buy peacock feathers', page_text)
+        self.assertIn('Buy milk', page_text)
 
         # self.fail('Finish the test!!')
 
-# if __name__ == '__main__':
-#     unittest.main(warnings='ignore')
+    def test_layout_and_styling(self):
+        # Alice访问首页
+        self.browser.get(self.live_server_url)
+        self.browser.set_window_size(1024, 768)
+        # 她看到输入框完美的居中显示
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        self.assertAlmostEqual(
+            inputbox.location['x'] + inputbox.size['width'] / 2,
+            512,
+            delta=10
+        )
 
-# assert 'To-Do' in browser.title, "Browser title was " + browser.title
-# Alice使用应用的故事
+        # 她新建了一个清单，看到输入框仍完美地居中显示
+        inputbox.send_keys('testing')
+        inputbox.send_keys(keys.Keys.ENTER)
+        self.wait_for_row_in_list_table('1: testing')
+        inputbox  =self.browser.find_element_by_id('id_new_item')
+        self.assertAlmostEqual(
+            inputbox.location['x'] + inputbox.size['width'] / 2,
+            512,
+            delta=10
+        )
 
+    # if __name__ == '__main__':
+    #     unittest.main(warnings='ignore')
 
-# 页面再次更新，他的待办事项清单中显示了这两个待办事项
+    # assert 'To-Do' in browser.title, "Browser title was " + browser.title
+    # Alice使用应用的故事
 
+    # 页面再次更新，他的待办事项清单中显示了这两个待办事项
 
-# 她访问那个URL，发现她的待办事项列表还在
+    # 她访问那个URL，发现她的待办事项列表还在
 
-# 她很满意，去睡觉了
+    # 她很满意，去睡觉了
