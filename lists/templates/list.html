@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>To-Do lists</title>
-</head>
-<body>
-<h1>Your To-Do list</h1>
+<h1>Start a new To-Do list</h1>
 <form action="/" method="post">
     {% csrf_token %}
     <input name="item_text" type="text" id="id_new_item" placeholder="Enter a to-do item"/>
@@ -17,5 +10,3 @@
         </tr>
     {% endfor %}
 </table>
-</body>
-</html>
